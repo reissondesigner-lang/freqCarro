@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequência Escolar</title>
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Controle mensal de frequência escolar por períodos." />
+  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --success: #16a34a;
+      --success-soft: #ecfdf3;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 10px 30px rgba(0,0,0,0.06);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #edf4ff 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .title-group h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .title-group p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: var(--shadow);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.97;
+    }
+
+    button.secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button.ghost {
+      background: var(--primary-soft);
+      color: var(--primary);
+      box-shadow: none;
+    }
+
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .status-pill {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .summary-card .value {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .calendar-card {
+      overflow: hidden;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-header h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 900;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .weekday {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 800;
+      padding-bottom: 4px;
+    }
+
+    .day-card {
+      background: #fbfcff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      min-height: 205px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: 0.2s ease;
+    }
+
+    .day-card:hover {
+      border-color: #c7d2fe;
+      transform: translateY(-1px);
+    }
+
+    .day-card.empty {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    .day-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .day-number {
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    .today-badge {
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .day-week {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .periods {
+      display: grid;
+      gap: 8px;
+    }
+
+    .period-btn {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: none;
+    }
+
+    .period-btn.active {
+      background: var(--success-soft);
+      border-color: #86efac;
+      color: var(--success);
+    }
+
+    .period-btn .check {
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    .obs-row {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .obs-badge {
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: #f3f4f6;
+      padding: 6px 10px;
+      border-radius: 999px;
+      max-width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .obs-btn {
+      background: #f9fafb;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      box-shadow: none;
+    }
+
+    .legend {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend-item {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 18px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 999;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      background: white;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.18);
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 1.3rem;
+    }
+
+    .modal p {
+      margin: 0 0 16px;
+      color: var(--muted);
+    }
+
+    .modal textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 14px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loader-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+      font-weight: 800;
+    }
+
+    @media (max-width: 1300px) {
+      .calendar-grid {
+        gap: 10px;
+      }
+
+      .day-card {
+        min-height: 190px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .calendar-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .weekday {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .calendar-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .day-card {
+        min-height: auto;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .actions button {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .title-group h1 {
+        font-size: 1.6rem;
+      }
+
+      .summary-card .value {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="title-group">
+        <h1>Frequência Escolar</h1>
+        <p>Registro mensal por período.</p>
+      </div>
+
+      <div class="actions">
+        <button class="secondary" id="installBtn" style="display:none;">Instalar App</button>
+        <button class="ghost" id="syncBtn">Sincronizar</button>
+        <button id="pdfBtn">Gerar PDF</button>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-pill" id="syncStatus">🔄 Aguardando sincronização...</div>
+      <div class="status-pill" id="onlineStatus">🌐 Verificando conexão...</div>
+      <div class="status-pill">👤 Motorista: Reisson Santos</div>
+      <div class="status-pill">📍 Rota: Benfica</div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="card summary-card">
+        <h3>Manhã</h3>
+        <div class="value" id="manhaCount">0</div>
+      </div>
+      <div class="card summary-card">
+        <h3>Meio-dia</h3>
+        <div class="value" id="meiodiaCount">0</div>
+      </div>
+      <div class="card summary-card">
+        <h3>Tarde</h3>
+        <div class="value" id="tardeCount">0</div>
+      </div>
+      <div class="card summary-card">
+        <h3>Dias rodados</h3>
+        <div class="value" id="diasRodadosCount">0</div>
+      </div>
+    </div>
+
+    <div class="card calendar-card">
+      <div class="calendar-header">
+        <h2 id="monthLabel">Carregando...</h2>
+        <div class="calendar-nav">
+          <button class="secondary" id="prevMonthBtn">←</button>
+          <button class="secondary" id="todayBtn">Hoje</button>
+          <button class="secondary" id="nextMonthBtn">→</button>
+        </div>
+      </div>
+
+      <div class="calendar-grid" id="calendarGrid"></div>
+
+      <div class="legend">
+        <div class="legend-item">✅ Toque para marcar/desmarcar</div>
+        <div class="legend-item">📝 Observação opcional</div>
+        <div class="legend-item">☁️ Dados salvos no Firebase</div>
+      </div>
+    </div>
+
+    <p class="footer-note">
+      Responsivo para celular e computador • Exportação mensal em PDF
+    </p>
+  </div>
+
+  <div class="modal-backdrop" id="obsModal">
+    <div class="modal">
+      <h3>Observação do dia</h3>
+      <p id="obsDateLabel">Editar observação</p>
+      <textarea id="obsInput" rows="5" placeholder="Ex: levei as crianças, trânsito, chuva..."></textarea>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelObsBtn">Cancelar</button>
+        <button id="saveObsBtn">Salvar observação</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader-card">Sincronizando dados...</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      collection,
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAQE0KpI1wQulxnNBfT6X9pJGrLK7ULRQk",
+  authDomain: "carro-escolar-freq-rei.firebaseapp.com",
+  projectId: "carro-escolar-freq-rei",
+  storageBucket: "carro-escolar-freq-rei.firebasestorage.app",
+  messagingSenderId: "245778081238",
+  appId: "1:245778081238:web:03daf666b18da02de33077"
+};
+
+
+    const RESPONSAVEL = "Reisson Santos";
+    const ROTA = "Benfica";
+    const COLLECTION_NAME = "frequencia_escolar";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const calendarGrid = document.getElementById("calendarGrid");
+    const monthLabel = document.getElementById("monthLabel");
+    const manhaCountEl = document.getElementById("manhaCount");
+    const meiodiaCountEl = document.getElementById("meiodiaCount");
+    const tardeCountEl = document.getElementById("tardeCount");
+    const diasRodadosCountEl = document.getElementById("diasRodadosCount");
+    const syncStatus = document.getElementById("syncStatus");
+    const onlineStatus = document.getElementById("onlineStatus");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+
+    const obsModal = document.getElementById("obsModal");
+    const obsInput = document.getElementById("obsInput");
+    const obsDateLabel = document.getElementById("obsDateLabel");
+
+    const prevMonthBtn = document.getElementById("prevMonthBtn");
+    const nextMonthBtn = document.getElementById("nextMonthBtn");
+    const todayBtn = document.getElementById("todayBtn");
+    const syncBtn = document.getElementById("syncBtn");
+    const pdfBtn = document.getElementById("pdfBtn");
+    const cancelObsBtn = document.getElementById("cancelObsBtn");
+    const saveObsBtn = document.getElementById("saveObsBtn");
+    const installBtn = document.getElementById("installBtn");
+
+    let currentDate = new Date();
+    let currentYear = currentDate.getFullYear();
+    let currentMonth = currentDate.getMonth();
+    let records = {};
+    let editingObsDate = null;
+    let deferredPrompt = null;
+
+    const localKey = (year, month) => `frequencia_escolar_${year}_${month + 1}`;
+
+    function showLoading(show = true) {
+      loadingOverlay.classList.toggle("show", show);
+    }
+
+    function setSyncStatus(text) {
+      syncStatus.textContent = text;
+    }
+
+    function updateOnlineStatus() {
+      onlineStatus.textContent = navigator.onLine ? "🌐 Online" : "📴 Offline";
+    }
+
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+    updateOnlineStatus();
+
+    function formatDateKey(year, month, day) {
+      const mm = String(month + 1).padStart(2, "0");
+      const dd = String(day).padStart(2, "0");
+      return `${year}-${mm}-${dd}`;
+    }
+
+    function getMonthName(month) {
+      return new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(new Date(2026, month, 1));
+    }
+
+    function getMonthLabel(year, month) {
+      const nome = getMonthName(month);
+      return `${nome.charAt(0).toUpperCase() + nome.slice(1)} ${year}`;
+    }
+
+    function getDaysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(year, month) {
+  return new Date(year, month, 1).getDay();
+}
+
+    function getWeekdayLabel(year, month, day) {
+      return new Intl.DateTimeFormat("pt-BR", { weekday: "short" })
+        .format(new Date(year, month, day))
+        .replace(".", "");
+    }
+
+    function getDefaultRecord(dateKey) {
+      return {
+        date: dateKey,
+        year: currentYear,
+        month: currentMonth + 1,
+        manha: false,
+        meiodia: false,
+        tarde: false,
+        observacao: "",
+        responsavel: RESPONSAVEL,
+        rota: ROTA,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function saveLocalCache() {
+      localStorage.setItem(localKey(currentYear, currentMonth), JSON.stringify(records));
+    }
+
+    function loadLocalCache() {
+      const cached = localStorage.getItem(localKey(currentYear, currentMonth));
+      if (cached) {
+        try {
+          records = JSON.parse(cached) || {};
+        } catch {
+          records = {};
+        }
+      } else {
+        records = {};
+      }
+    }
+
+    async function saveRecord(dateKey) {
+      const record = records[dateKey];
+      if (!record) return;
+
+      record.updatedAt = new Date().toISOString();
+      saveLocalCache();
+
+      if (!navigator.onLine) {
+        setSyncStatus("📴 Alterações salvas localmente (offline)");
+        return;
+      }
+
+      try {
+        setSyncStatus("☁️ Salvando no Firebase...");
+        await setDoc(doc(db, COLLECTION_NAME, dateKey), record);
+        setSyncStatus("✅ Dados sincronizados com sucesso");
+      } catch (error) {
+        console.error("Erro ao salvar:", error);
+        setSyncStatus("⚠️ Erro ao sincronizar — salvo localmente");
+      }
+    }
+
+    async function fetchMonthRecords(year, month) {
+      showLoading(true);
+      loadLocalCache();
+      renderCalendar();
+      updateSummary();
+
+      if (!navigator.onLine) {
+        setSyncStatus("📴 Offline — usando dados locais");
+        showLoading(false);
+        return;
+      }
+
+      try {
+        const monthNumber = month + 1;
+        const q = query(
+          collection(db, COLLECTION_NAME),
+          where("year", "==", year),
+          where("month", "==", monthNumber)
+        );
+
+        const snapshot = await getDocs(q);
+        const firebaseRecords = {};
+
+        snapshot.forEach((docSnap) => {
+          firebaseRecords[docSnap.id] = docSnap.data();
+        });
+
+        records = firebaseRecords;
+        saveLocalCache();
+        renderCalendar();
+        updateSummary();
+        setSyncStatus("☁️ Dados carregados do Firebase");
+      } catch (error) {
+        console.error("Erro ao carregar:", error);
+        setSyncStatus("⚠️ Erro ao carregar Firebase — usando cache local");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function togglePeriod(dateKey, period) {
+      if (!records[dateKey]) {
+        records[dateKey] = getDefaultRecord(dateKey);
+      }
+
+      records[dateKey][period] = !records[dateKey][period];
+      records[dateKey].year = currentYear;
+      records[dateKey].month = currentMonth + 1;
+      records[dateKey].responsavel = RESPONSAVEL;
+      records[dateKey].rota = ROTA;
+
+      renderCalendar();
+      updateSummary();
+      saveRecord(dateKey);
+    }
+
+    function openObsModal(dateKey) {
+      editingObsDate = dateKey;
+      if (!records[dateKey]) {
+        records[dateKey] = getDefaultRecord(dateKey);
+      }
+
+      obsInput.value = records[dateKey].observacao || "";
+      const [year, month, day] = dateKey.split("-");
+      obsDateLabel.textContent = `Observação de ${day}/${month}/${year}`;
+      obsModal.classList.add("show");
+    }
+
+    function closeObsModal() {
+      obsModal.classList.remove("show");
+      editingObsDate = null;
+      obsInput.value = "";
+    }
+
+    async function saveObservation() {
+      if (!editingObsDate) return;
+      if (!records[editingObsDate]) {
+        records[editingObsDate] = getDefaultRecord(editingObsDate);
+      }
+
+      records[editingObsDate].observacao = obsInput.value.trim();
+      records[editingObsDate].year = currentYear;
+      records[editingObsDate].month = currentMonth + 1;
+      records[editingObsDate].responsavel = RESPONSAVEL;
+      records[editingObsDate].rota = ROTA;
+
+      renderCalendar();
+      updateSummary();
+      await saveRecord(editingObsDate);
+      closeObsModal();
+    }
+
+    function updateSummary() {
+      let manha = 0, meiodia = 0, tarde = 0, diasRodados = 0;
+
+      const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = formatDateKey(currentYear, currentMonth, day);
+        const rec = records[dateKey];
+
+        if (!rec) continue;
+
+        if (rec.manha) manha++;
+        if (rec.meiodia) meiodia++;
+        if (rec.tarde) tarde++;
+
+        if (rec.manha || rec.meiodia || rec.tarde) diasRodados++;
+      }
+
+      manhaCountEl.textContent = manha;
+      meiodiaCountEl.textContent = meiodia;
+      tardeCountEl.textContent = tarde;
+      diasRodadosCountEl.textContent = diasRodados;
+    }
+
+    function renderCalendar() {
+      monthLabel.textContent = getMonthLabel(currentYear, currentMonth);
+      calendarGrid.innerHTML = "";
+
+      const weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+      const isDesktopOrTablet = window.innerWidth > 768;
+
+      if (isDesktopOrTablet) {
+        weekdays.forEach(day => {
+          const el = document.createElement("div");
+          el.className = "weekday";
+          el.textContent = day;
+          calendarGrid.appendChild(el);
+        });
+      }
+
+      const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+      const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+      const today = new Date();
+
+      if (isDesktopOrTablet) {
+        for (let i = 0; i < firstDay; i++) {
+          const empty = document.createElement("div");
+          empty.className = "day-card empty";
+          calendarGrid.appendChild(empty);
+        }
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = formatDateKey(currentYear, currentMonth, day);
+        const rec = records[dateKey] || getDefaultRecord(dateKey);
+        const isToday =
+          today.getFullYear() === currentYear &&
+          today.getMonth() === currentMonth &&
+          today.getDate() === day;
+
+        const dayCard = document.createElement("div");
+        dayCard.className = "day-card";
+
+        const obsPreview = rec.observacao?.trim()
+          ? `<span class="obs-badge">${escapeHtml(rec.observacao)}</span>`
+          : `<span class="obs-badge">Sem observação</span>`;
+
+        dayCard.innerHTML = `
+          <div class="day-top">
+            <div>
+              <div class="day-number">${day}</div>
+              <div class="day-week">${capitalize(getWeekdayLabel(currentYear, currentMonth, day))}</div>
+            </div>
+            ${isToday ? `<span class="today-badge">Hoje</span>` : ``}
+          </div>
+
+          <div class="periods">
+            <button class="period-btn ${rec.manha ? "active" : ""}" data-date="${dateKey}" data-period="manha">
+              <span>Manhã</span>
+              <span class="check">${rec.manha ? "✓" : ""}</span>
+            </button>
+
+            <button class="period-btn ${rec.meiodia ? "active" : ""}" data-date="${dateKey}" data-period="meiodia">
+              <span>Meio-dia</span>
+              <span class="check">${rec.meiodia ? "✓" : ""}</span>
+            </button>
+
+            <button class="period-btn ${rec.tarde ? "active" : ""}" data-date="${dateKey}" data-period="tarde">
+              <span>Tarde</span>
+              <span class="check">${rec.tarde ? "✓" : ""}</span>
+            </button>
+          </div>
+
+          <div class="obs-row">
+            ${obsPreview}
+            <button class="obs-btn" data-obs="${dateKey}">📝</button>
+          </div>
+        `;
+
+        calendarGrid.appendChild(dayCard);
+      }
+
+      bindCalendarEvents();
+    }
+
+    function bindCalendarEvents() {
+      document.querySelectorAll(".period-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const dateKey = btn.dataset.date;
+          const period = btn.dataset.period;
+          togglePeriod(dateKey, period);
+        });
+      });
+
+      document.querySelectorAll("[data-obs]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          openObsModal(btn.dataset.obs);
+        });
+      });
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function drawCell(doc, x, y, w, h, text = "", align = "center", fontStyle = "normal", fontSize = 8) {
+      doc.rect(x, y, w, h);
+      doc.setFont("helvetica", fontStyle);
+      doc.setFontSize(fontSize);
+
+      const lines = doc.splitTextToSize(String(text), w - 2);
+      const textY = y + h / 2 + 1;
+
+      if (align === "left") {
+        doc.text(lines, x + 1.5, textY, { baseline: "middle" });
+      } else {
+        doc.text(lines, x + w / 2, textY, { align: "center", baseline: "middle" });
+      }
+    }
+
+
+function generatePdf() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  const monthName = capitalize(getMonthName(currentMonth));
+  const fileName = `Frequencia-Escolar-${monthName}-${currentYear}.pdf`;
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  const margin = 10;
+  const usableWidth = pageWidth - (margin * 2);
+
+  let y = 10;
+
+  // =========================
+  // CABEÇALHO
+  // =========================
+  doc.setDrawColor(30, 30, 30);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(margin, y, usableWidth, 22, 3, 3);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("FREQUÊNCIA ESCOLAR", pageWidth / 2, y + 7, { align: "center" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(`Motorista: ${RESPONSAVEL}`, margin + 3, y + 14);
+  doc.text(`Rota: ${ROTA}`, margin + 3, y + 19);
+  doc.text(`${monthName} ${currentYear}`, pageWidth - margin - 3, y + 16, { align: "right" });
+
+  y += 28;
+
+  // =========================
+  // CONFIGURAÇÃO DA TABELA
+  // =========================
+  const cols = [
+    { label: "Data", width: 18 },
+    { label: "Dia", width: 18 },
+    { label: "Manhã", width: 16 },
+    { label: "Meio-dia", width: 20 },
+    { label: "Tarde", width: 16 },
+    { label: "Observação", width: usableWidth - (18 + 18 + 16 + 20 + 16) }
+  ];
+
+  const headerHeight = 8;
+  const rowHeight = 7.2;
+  const summaryHeight = 18;
+
+  function drawCell(x, y, w, h, text = "", align = "center", fontStyle = "normal", fontSize = 8) {
+    doc.rect(x, y, w, h);
+    doc.setFont("helvetica", fontStyle);
+    doc.setFontSize(fontSize);
+
+    let finalText = String(text || "");
+
+    // Truncar texto para não estourar a linha
+    const maxChars = Math.floor((w - 2) * 1.8);
+    if (finalText.length > maxChars) {
+      finalText = finalText.slice(0, Math.max(0, maxChars - 1)) + "…";
+    }
+
+    const textY = y + h / 2 + 0.5;
+
+    if (align === "left") {
+      doc.text(finalText, x + 1.5, textY, { baseline: "middle" });
+    } else {
+      doc.text(finalText, x + w / 2, textY, { align: "center", baseline: "middle" });
+    }
+  }
+
+  // =========================
+  // CABEÇALHO DA TABELA
+  // =========================
+  let x = margin;
+  cols.forEach(col => {
+    drawCell(x, y, col.width, headerHeight, col.label, "center", "bold", 8);
+    x += col.width;
+  });
+
+  y += headerHeight;
+
+  // =========================
+  // LINHAS DOS 31 DIAS
+  // =========================
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = formatDateKey(currentYear, currentMonth, day);
+    const rec = records[dateKey] || getDefaultRecord(dateKey);
+
+    const data = `${String(day).padStart(2, "0")}/${String(currentMonth + 1).padStart(2, "0")}`;
+    const diaSemana = capitalize(getWeekdayLabel(currentYear, currentMonth, day)).slice(0, 3);
+    const obs = (rec.observacao || "").replace(/\n/g, " ");
+
+    x = margin;
+    drawCell(x, y, cols[0].width, rowHeight, data); x += cols[0].width;
+    drawCell(x, y, cols[1].width, rowHeight, diaSemana); x += cols[1].width;
+    drawCell(x, y, cols[2].width, rowHeight, rec.manha ? "X" : ""); x += cols[2].width;
+    drawCell(x, y, cols[3].width, rowHeight, rec.meiodia ? "X" : ""); x += cols[3].width;
+    drawCell(x, y, cols[4].width, rowHeight, rec.tarde ? "X" : ""); x += cols[4].width;
+    drawCell(x, y, cols[5].width, rowHeight, obs, "center", "normal", 7.5);
+
+    y += rowHeight;
+  }
+
+  // =========================
+  // COMPLETAR ATÉ 31 LINHAS
+  // =========================
+  for (let day = daysInMonth + 1; day <= 31; day++) {
+    const data = `${String(day).padStart(2, "0")}/${String(currentMonth + 1).padStart(2, "0")}`;
+
+    x = margin;
+    drawCell(x, y, cols[0].width, rowHeight, data); x += cols[0].width;
+    drawCell(x, y, cols[1].width, rowHeight, ""); x += cols[1].width;
+    drawCell(x, y, cols[2].width, rowHeight, ""); x += cols[2].width;
+    drawCell(x, y, cols[3].width, rowHeight, ""); x += cols[3].width;
+    drawCell(x, y, cols[4].width, rowHeight, ""); x += cols[4].width;
+    drawCell(x, y, cols[5].width, rowHeight, "", "left", "normal", 7.5);
+
+    y += rowHeight;
+  }
+
+  // =========================
+// RESUMO FINAL CENTRALIZADO
+// =========================
+y += 2	;
+
+doc.setFillColor(240, 247, 255);
+doc.roundedRect(margin, y, usableWidth, summaryHeight, 3, 3, "FD");
+
+doc.setFont("helvetica", "bold");
+doc.setFontSize(10);
+doc.text("Resumo do mês", pageWidth / 2, y + 6, { align: "center" });
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(9);
+
+doc.text(
+  `Manhã: ${manhaCountEl.textContent}   •   Meio-dia: ${meiodiaCountEl.textContent}   •   Tarde: ${tardeCountEl.textContent}`,
+  pageWidth / 2,
+  y + 11,
+  { align: "center" }
+);
+
+// Destaque especial para Dias rodados
+doc.setFont("helvetica", "bold");
+doc.setFontSize(11);
+
+doc.text(
+  `Dias rodados: ${diasRodadosCountEl.textContent}`,
+  pageWidth / 2,
+  y + 16,
+  { align: "center" }
+);
+  doc.save(fileName);
+}
+
+    prevMonthBtn.addEventListener("click", async () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      await fetchMonthRecords(currentYear, currentMonth);
+    });
+
+    nextMonthBtn.addEventListener("click", async () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      await fetchMonthRecords(currentYear, currentMonth);
+    });
+
+    todayBtn.addEventListener("click", async () => {
+      const now = new Date();
+      currentYear = now.getFullYear();
+      currentMonth = now.getMonth();
+      await fetchMonthRecords(currentYear, currentMonth);
+    });
+
+    syncBtn.addEventListener("click", async () => {
+      await fetchMonthRecords(currentYear, currentMonth);
+    });
+
+    pdfBtn.addEventListener("click", generatePdf);
+    cancelObsBtn.addEventListener("click", closeObsModal);
+    saveObsBtn.addEventListener("click", saveObservation);
+
+    obsModal.addEventListener("click", (e) => {
+      if (e.target === obsModal) closeObsModal();
+    });
+
+    window.addEventListener("resize", renderCalendar);
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = "inline-flex";
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    });
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js");
+      });
+    }
+
+    await fetchMonthRecords(currentYear, currentMonth);
+  </script>
+</body>
+</html>
