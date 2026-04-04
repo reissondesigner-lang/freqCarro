@@ -457,7 +457,7 @@
     <div class="topbar">
       <div class="title-group">
         <h1>Frequência Escolar</h1>
-        <p>Registro mensal por período.</p>
+        <p>Registro mensal Reisson Santos.</p>
       </div>
 
       <div class="actions">
@@ -468,10 +468,8 @@
     </div>
 
     <div class="status-bar">
-      <div class="status-pill" id="syncStatus">🔄 Aguardando sincronização...</div>
+      <div class="status-pill" id="syncStatus">🔄 sincronizando...</div>
       <div class="status-pill" id="onlineStatus">🌐 Verificando conexão...</div>
-      <div class="status-pill">👤 Motorista: Reisson Santos</div>
-      <div class="status-pill">📍 Rota: Benfica</div>
     </div>
 
     <div class="summary-grid">
@@ -479,10 +477,7 @@
         <h3>Manhã</h3>
         <div class="value" id="manhaCount">0</div>
       </div>
-      <div class="card summary-card">
-        <h3>Meio-dia</h3>
-        <div class="value" id="meiodiaCount">0</div>
-      </div>
+      
       <div class="card summary-card">
         <h3>Tarde</h3>
         <div class="value" id="tardeCount">0</div>
@@ -507,13 +502,11 @@
 
       <div class="legend">
         <div class="legend-item">✅ Toque para marcar/desmarcar</div>
-        <div class="legend-item">📝 Observação opcional</div>
-        <div class="legend-item">☁️ Dados salvos no Firebase</div>
       </div>
     </div>
 
     <p class="footer-note">
-      Responsivo para celular e computador • Exportação mensal em PDF
+Por Reisson Santos
     </p>
   </div>
 
@@ -567,7 +560,6 @@ const firebaseConfig = {
     const calendarGrid = document.getElementById("calendarGrid");
     const monthLabel = document.getElementById("monthLabel");
     const manhaCountEl = document.getElementById("manhaCount");
-    const meiodiaCountEl = document.getElementById("meiodiaCount");
     const tardeCountEl = document.getElementById("tardeCount");
     const diasRodadosCountEl = document.getElementById("diasRodadosCount");
     const syncStatus = document.getElementById("syncStatus");
@@ -647,7 +639,6 @@ const firebaseConfig = {
         year: currentYear,
         month: currentMonth + 1,
         manha: false,
-        meiodia: false,
         tarde: false,
         observacao: "",
         responsavel: RESPONSAVEL,
@@ -726,7 +717,7 @@ const firebaseConfig = {
         saveLocalCache();
         renderCalendar();
         updateSummary();
-        setSyncStatus("☁️ Dados carregados do Firebase");
+        setSyncStatus("☁️ Atualizado");
       } catch (error) {
         console.error("Erro ao carregar:", error);
         setSyncStatus("⚠️ Erro ao carregar Firebase — usando cache local");
@@ -788,28 +779,26 @@ const firebaseConfig = {
     }
 
     function updateSummary() {
-      let manha = 0, meiodia = 0, tarde = 0, diasRodados = 0;
+  let manha = 0, tarde = 0, diasRodados = 0;
 
-      const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateKey = formatDateKey(currentYear, currentMonth, day);
-        const rec = records[dateKey];
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = formatDateKey(currentYear, currentMonth, day);
+    const rec = records[dateKey];
 
-        if (!rec) continue;
+    if (!rec) continue;
 
-        if (rec.manha) manha++;
-        if (rec.meiodia) meiodia++;
-        if (rec.tarde) tarde++;
+    if (rec.manha) manha++;
+    if (rec.tarde) tarde++;
 
-        if (rec.manha || rec.meiodia || rec.tarde) diasRodados++;
-      }
+    if (rec.manha || rec.tarde) diasRodados++;
+  }
 
-      manhaCountEl.textContent = manha;
-      meiodiaCountEl.textContent = meiodia;
-      tardeCountEl.textContent = tarde;
-      diasRodadosCountEl.textContent = diasRodados;
-    }
+  manhaCountEl.textContent = manha;
+  tardeCountEl.textContent = tarde;
+  diasRodadosCountEl.textContent = diasRodados;
+}
 
     function renderCalendar() {
       monthLabel.textContent = getMonthLabel(currentYear, currentMonth);
@@ -869,10 +858,7 @@ const firebaseConfig = {
               <span class="check">${rec.manha ? "✓" : ""}</span>
             </button>
 
-            <button class="period-btn ${rec.meiodia ? "active" : ""}" data-date="${dateKey}" data-period="meiodia">
-              <span>Meio-dia</span>
-              <span class="check">${rec.meiodia ? "✓" : ""}</span>
-            </button>
+            
 
             <button class="period-btn ${rec.tarde ? "active" : ""}" data-date="${dateKey}" data-period="tarde">
               <span>Tarde</span>
@@ -934,7 +920,7 @@ const firebaseConfig = {
     }
 
 
-function generatePdf() {
+async function generatePdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
 
@@ -975,7 +961,6 @@ function generatePdf() {
     { label: "Data", width: 18 },
     { label: "Dia", width: 18 },
     { label: "Manhã", width: 16 },
-    { label: "Meio-dia", width: 20 },
     { label: "Tarde", width: 16 },
     { label: "Observação", width: usableWidth - (18 + 18 + 16 + 20 + 16) }
   ];
@@ -1034,9 +1019,8 @@ function generatePdf() {
     drawCell(x, y, cols[0].width, rowHeight, data); x += cols[0].width;
     drawCell(x, y, cols[1].width, rowHeight, diaSemana); x += cols[1].width;
     drawCell(x, y, cols[2].width, rowHeight, rec.manha ? "X" : ""); x += cols[2].width;
-    drawCell(x, y, cols[3].width, rowHeight, rec.meiodia ? "X" : ""); x += cols[3].width;
-    drawCell(x, y, cols[4].width, rowHeight, rec.tarde ? "X" : ""); x += cols[4].width;
-    drawCell(x, y, cols[5].width, rowHeight, obs, "center", "normal", 7.5);
+    drawCell(x, y, cols[3].width, rowHeight, rec.tarde ? "X" : ""); x += cols[3].width;
+    drawCell(x, y, cols[4].width, rowHeight, obs, "center", "normal", 7.5);
 
     y += rowHeight;
   }
@@ -1052,8 +1036,7 @@ function generatePdf() {
     drawCell(x, y, cols[1].width, rowHeight, ""); x += cols[1].width;
     drawCell(x, y, cols[2].width, rowHeight, ""); x += cols[2].width;
     drawCell(x, y, cols[3].width, rowHeight, ""); x += cols[3].width;
-    drawCell(x, y, cols[4].width, rowHeight, ""); x += cols[4].width;
-    drawCell(x, y, cols[5].width, rowHeight, "", "left", "normal", 7.5);
+    drawCell(x, y, cols[4].width, rowHeight, "", "left", "normal", 7.5);
 
     y += rowHeight;
   }
@@ -1074,7 +1057,7 @@ doc.setFont("helvetica", "normal");
 doc.setFontSize(9);
 
 doc.text(
-  `Manhã: ${manhaCountEl.textContent}   •   Meio-dia: ${meiodiaCountEl.textContent}   •   Tarde: ${tardeCountEl.textContent}`,
+  `Manhã: ${manhaCountEl.textContent}  •   Tarde: ${tardeCountEl.textContent}`,
   pageWidth / 2,
   y + 11,
   { align: "center" }
@@ -1090,8 +1073,22 @@ doc.text(
   y + 16,
   { align: "center" }
 );
+const pdfBlob = doc.output("blob");
+const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+
+if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+  try {
+    await navigator.share({
+      title: fileName,
+      text: `Frequência escolar - ${monthName} ${currentYear}`,
+      files: [pdfFile]
+    });
+  } catch (error) {
+    doc.save(fileName);
+  }
+} else {
   doc.save(fileName);
-}
+}}
 
     prevMonthBtn.addEventListener("click", async () => {
       currentMonth--;
