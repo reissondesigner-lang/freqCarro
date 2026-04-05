@@ -29,6 +29,28 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  const requestURL = new URL(event.request.url);
+
+  // Atualiza sempre o index.html
+  if (requestURL.pathname === "/" || requestURL.pathname === "/index.html") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Atualiza o cache
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        })
+        .catch(() => {
+          // Se offline, serve do cache
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Para outros arquivos, cache-first
   event.respondWith(
     caches.match(event.request).then((cached) => {
       return cached || fetch(event.request);
