@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frequência Escolar</title>
+  <title>Frequência Van Escolar</title>
   <meta name="theme-color" content="#2563eb" />
   <meta name="description" content="Controle mensal de frequência escolar por períodos." />
   <link rel="manifest" href="manifest.json" />
@@ -116,11 +116,11 @@
     }
 
     .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 18px;
-    }
+  display: flex;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: nowrap; /* garante que não quebre em celular */
+}
 
     .card {
       background: var(--card);
@@ -129,6 +129,11 @@
       padding: 18px;
       box-shadow: var(--shadow);
     }
+
+    .summary-card {
+  flex: 1; /* Cada card ocupa espaço igual */
+  min-width: 0; /* Previne overflow em celular */
+}
 
     .summary-card h3 {
       margin: 0 0 8px;
@@ -403,7 +408,6 @@
 
     @media (max-width: 1100px) {
       .summary-grid {
-        grid-template-columns: repeat(2, 1fr);
       }
 
       .calendar-grid {
@@ -456,7 +460,7 @@
   <div class="container">
     <div class="topbar">
       <div class="title-group">
-        <h1>Frequência Escolar</h1>
+        <h1>Frequência Van Escolar</h1>
         <p>Registro mensal Reisson Santos.</p>
       </div>
 
