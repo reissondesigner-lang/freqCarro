@@ -686,7 +686,7 @@ const firebaseConfig = {
       try {
         setSyncStatus("☁️ Salvando no Firebase...");
         await setDoc(doc(db, COLLECTION_NAME, dateKey), record);
-        setSyncStatus("✅ Dados sincronizados com sucesso");
+        setSyncStatus("✅ Dados enviados");
       } catch (error) {
         console.error("Erro ao salvar:", error);
         setSyncStatus("⚠️ Erro ao sincronizar — salvo localmente");
