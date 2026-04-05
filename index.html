@@ -930,7 +930,7 @@ async function generatePdf() {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  const margin = 10;
+  const margin = 7;
   const usableWidth = pageWidth - (margin * 2);
 
   let y = 10;
@@ -939,20 +939,38 @@ async function generatePdf() {
   // CABEÇALHO
   // =========================
   doc.setDrawColor(30, 30, 30);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(margin, y, usableWidth, 22, 3, 3);
+doc.setLineWidth(0.4);
+doc.roundedRect(margin, y, usableWidth, 22, 3, 3);
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("FREQUÊNCIA ESCOLAR", pageWidth / 2, y + 7, { align: "center" });
+// Título
+doc.setFont("helvetica", "bold");
+doc.setFontSize(14);
+doc.text("FREQUÊNCIA VAN ESCOLAR", pageWidth / 2, y + 7, { align: "center" });
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Motorista: ${RESPONSAVEL}`, margin + 3, y + 14);
-  doc.text(`Rota: ${ROTA}`, margin + 3, y + 19);
-  doc.text(`${monthName} ${currentYear}`, pageWidth - margin - 3, y + 16, { align: "right" });
+// Labels em negrito
+doc.setFont("helvetica", "bold");
+doc.setFontSize(9);
 
-  y += 28;
+// Motorista label
+doc.text("Motorista:", margin + 3, y + 14);
+
+// Valor normal
+doc.setFont("helvetica", "normal");
+doc.text(`${RESPONSAVEL}`, margin + 22, y + 14);
+
+// Rota label
+doc.setFont("helvetica", "bold");
+doc.text("Rota:", margin + 3, y + 19);
+
+// Valor normal
+doc.setFont("helvetica", "normal");
+doc.text(`${ROTA}`, margin + 15, y + 19);
+
+// Mês e ano em negrito
+doc.setFont("helvetica", "bold");
+doc.text(`${monthName} ${currentYear}`, pageWidth - margin - 3, y + 16, { align: "right" });
+
+y += 28;
 
   // =========================
   // CONFIGURAÇÃO DA TABELA
@@ -962,7 +980,7 @@ async function generatePdf() {
     { label: "Dia", width: 18 },
     { label: "Manhã", width: 16 },
     { label: "Tarde", width: 16 },
-    { label: "Observação", width: usableWidth - (18 + 18 + 16 + 20 + 16) }
+    { label: "Observação", width: usableWidth - (18 + 18 + 16 + 16) }
   ];
 
   const headerHeight = 8;
@@ -1076,11 +1094,18 @@ doc.text(
 const pdfBlob = doc.output("blob");
 const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
 
-if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+const isMobileLike = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if (
+  isMobileLike &&
+  navigator.canShare &&
+  navigator.canShare({ files: [pdfFile] }) &&
+  navigator.share
+) {
   try {
     await navigator.share({
       title: fileName,
-      text: `Frequência escolar - ${monthName} ${currentYear}`,
+      text: `Segue a frequência escolar referente a ${monthName} de ${currentYear}.`,
       files: [pdfFile]
     });
   } catch (error) {
